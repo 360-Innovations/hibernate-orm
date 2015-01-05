@@ -2550,12 +2550,25 @@ public final class HbmBinder {
 			if ( condition==null) {
 				throw new MappingException("no filter condition found for filter: " + name);
 			}
+			
+			Iterator aliasesIterator = filterElement.elementIterator("aliases");
+			java.util.Map aliasTables = new HashMap();
+			while (aliasesIterator.hasNext()){
+				Element alias = (Element) aliasesIterator.next();
+				aliasTables.put(alias.attributeValue("alias"), alias.attributeValue("table"));
+			}
+			
 			log.debug(
 					"Applying many-to-many filter [" + name +
 					"] as [" + condition +
 					"] to role [" + collection.getRole() + "]"
 				);
-			collection.addManyToManyFilter( name, condition );
+			
+			String autoAliasInjectionText = filterElement.attributeValue("autoAliasInjection");
+			boolean autoAliasInjection = StringHelper.isEmpty(autoAliasInjectionText) ? true : Boolean.parseBoolean(autoAliasInjectionText);
+			collection.addManyToManyFilter(name, condition, autoAliasInjection, aliasTables, null);
+
+			//OLD collection.addManyToManyFilter( name, condition );
 		}
 	}
 
@@ -2959,8 +2972,16 @@ public final class HbmBinder {
 		if ( condition==null) {
 			throw new MappingException("no filter condition found for filter: " + name);
 		}
-		log.debug( "Applying filter [" + name + "] as [" + condition + "]" );
-		filterable.addFilter( name, condition );
+		Iterator aliasesIterator = filterElement.elementIterator("aliases");
+		java.util.Map aliasTables = new HashMap();
+		while (aliasesIterator.hasNext()){
+			Element alias = (Element) aliasesIterator.next();
+			aliasTables.put(alias.attributeValue("alias"), alias.attributeValue("table"));
+		}
+		log.debug( "Applying filter [%s] as [%s]", name, condition );
+		String autoAliasInjectionText = filterElement.attributeValue("autoAliasInjection");
+		boolean autoAliasInjection = StringHelper.isEmpty(autoAliasInjectionText) ? true : Boolean.parseBoolean(autoAliasInjectionText);
+		filterable.addFilter(name, condition, autoAliasInjection, aliasTables, null);
 	}
 
 	private static String getSubselect(Element element) {

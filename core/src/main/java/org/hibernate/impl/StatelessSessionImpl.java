@@ -36,10 +36,17 @@ import org.hibernate.ConnectionReleaseMode;
 import org.hibernate.Criteria;
 import org.hibernate.EmptyInterceptor;
 import org.hibernate.EntityMode;
+import org.hibernate.Filter;
 import org.hibernate.FlushMode;
 import org.hibernate.HibernateException;
 import org.hibernate.Interceptor;
 import org.hibernate.LockMode;
+import org.hibernate.Query;
+import org.hibernate.ReplicationMode;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.event.OpenSessionEvent;
+import org.hibernate.event.OpenSessionEventListener;
 import org.hibernate.MappingException;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
@@ -49,6 +56,8 @@ import org.hibernate.Transaction;
 import org.hibernate.UnresolvableObjectException;
 import org.hibernate.cache.CacheKey;
 import org.hibernate.collection.PersistentCollection;
+import org.hibernate.engine.ActionQueue;
+import org.hibernate.engine.EntityEntry;
 import org.hibernate.engine.EntityKey;
 import org.hibernate.engine.PersistenceContext;
 import org.hibernate.engine.QueryParameters;
@@ -58,9 +67,13 @@ import org.hibernate.engine.query.HQLQueryPlan;
 import org.hibernate.engine.query.NativeSQLQueryPlan;
 import org.hibernate.engine.query.sql.NativeSQLQuerySpecification;
 import org.hibernate.event.EventListeners;
+import org.hibernate.event.EventSource;
+import org.hibernate.event.OpenSessionEvent;
+import org.hibernate.event.OpenSessionEventListener;
 import org.hibernate.id.IdentifierGeneratorFactory;
 import org.hibernate.jdbc.Batcher;
 import org.hibernate.jdbc.JDBCContext;
+import org.hibernate.jdbc.Work;
 import org.hibernate.loader.criteria.CriteriaLoader;
 import org.hibernate.loader.custom.CustomLoader;
 import org.hibernate.loader.custom.CustomQuery;
@@ -68,6 +81,7 @@ import org.hibernate.persister.entity.EntityPersister;
 import org.hibernate.persister.entity.OuterJoinLoadable;
 import org.hibernate.pretty.MessageHelper;
 import org.hibernate.proxy.HibernateProxy;
+import org.hibernate.stat.SessionStatistics;
 import org.hibernate.type.Type;
 import org.hibernate.util.CollectionHelper;
 
@@ -81,10 +95,14 @@ public class StatelessSessionImpl extends AbstractSessionImpl
 
 	private JDBCContext jdbcContext;
 	private PersistenceContext temporaryPersistenceContext = new StatefulPersistenceContext( this );
+	private transient EventListeners listeners;
 
 	StatelessSessionImpl(Connection connection, SessionFactoryImpl factory) {
 		super( factory );
 		this.jdbcContext = new JDBCContext( this, connection, EmptyInterceptor.INSTANCE );
+		this.listeners = factory.getEventListeners();
+		
+		fireOpenSession(new OpenSessionEvent((EventSource)this));
 	}
 
 
@@ -655,4 +673,13 @@ public class StatelessSessionImpl extends AbstractSessionImpl
 		return result;
 	}
 
+	private void fireOpenSession(OpenSessionEvent event) {
+		OpenSessionEventListener[] openSessionEventListener = listeners.getOpenSessionEventListeners();
+		for ( int i = 0; i < openSessionEventListener.length; i++ ) {
+			openSessionEventListener[i].onOpenSession(event);
+		}
+	}
+
+
+		
 }

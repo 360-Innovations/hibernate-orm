@@ -38,6 +38,8 @@ import org.hibernate.cache.access.EntityRegionAccessStrategy;
 import org.hibernate.engine.Mapping;
 import org.hibernate.engine.SessionFactoryImplementor;
 import org.hibernate.engine.ExecuteUpdateResultCheckStyle;
+import org.hibernate.impl.DynamicFilterAliasGenerator;
+import org.hibernate.impl.FilterAliasGenerator;
 import org.hibernate.mapping.Column;
 import org.hibernate.mapping.Formula;
 import org.hibernate.mapping.Join;
@@ -732,5 +734,9 @@ public class SingleTableEntityPersister extends AbstractEntityPersister {
 
 	public String[][] getContraintOrderedTableKeyColumnClosure() {
 		return constraintOrderedKeyColumnNames;
+	}
+	
+	public FilterAliasGenerator getFilterAliasGenerator(String rootAlias) {
+		return new DynamicFilterAliasGenerator(qualifiedTableNames, rootAlias);
 	}
 }

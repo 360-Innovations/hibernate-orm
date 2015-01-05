@@ -1352,7 +1352,17 @@ public class Configuration implements Serializable {
 		copy.putAll( properties );
 		PropertiesHelper.resolvePlaceHolders( copy );
 		Settings settings = buildSettings( copy );
-
+		
+		String className = (String)properties.get("hibernate.ejb.session_factory_observer");
+		if (className != null)
+		{
+			try {
+				setSessionFactoryObserver((SessionFactoryObserver) ReflectHelper.classForName(className).newInstance());
+			} catch (Exception e) {
+				log.warn("Can't set SessionFactoryObserver class", e);
+			}
+		}
+			
 		return new SessionFactoryImpl(
 				this,
 				mapping,

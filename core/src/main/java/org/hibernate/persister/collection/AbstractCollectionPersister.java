@@ -61,6 +61,7 @@ import org.hibernate.engine.ExecuteUpdateResultCheckStyle;
 import org.hibernate.exception.JDBCExceptionHelper;
 import org.hibernate.exception.SQLExceptionConverter;
 import org.hibernate.id.IdentifierGenerator;
+import org.hibernate.impl.FilterAliasGenerator;
 import org.hibernate.loader.collection.CollectionInitializer;
 import org.hibernate.mapping.Collection;
 import org.hibernate.mapping.Column;
@@ -541,10 +542,10 @@ public abstract class AbstractCollectionPersister
 		}
 			
 		// Handle any filters applied to this collection
-		filterHelper = new FilterHelper( collection.getFilterMap(), dialect, factory.getSqlFunctionRegistry() );
+		filterHelper = new FilterHelper( collection.getFilters(), factory);
 
 		// Handle any filters applied to this collection for many-to-many
-		manyToManyFilterHelper = new FilterHelper( collection.getManyToManyFilterMap(), dialect, factory.getSqlFunctionRegistry() );
+		manyToManyFilterHelper = new FilterHelper( collection.getManyToManyFilters(), factory);
 		manyToManyWhereString = StringHelper.isNotEmpty( collection.getManyToManyWhere() ) ?
 				"( " + collection.getManyToManyWhere() + ")" :
 				null;
@@ -1461,7 +1462,7 @@ public abstract class AbstractCollectionPersister
 
 	public String getManyToManyFilterFragment(String alias, Map enabledFilters) {
 		StringBuffer buffer = new StringBuffer();
-		manyToManyFilterHelper.render( buffer, alias, enabledFilters );
+		manyToManyFilterHelper.render( buffer, elementPersister.getFilterAliasGenerator(alias), enabledFilters );
 
 		if ( manyToManyWhereString != null ) {
 			buffer.append( " and " )
@@ -1564,7 +1565,7 @@ public abstract class AbstractCollectionPersister
 	public String filterFragment(String alias, Map enabledFilters) throws MappingException {
 
 		StringBuffer sessionFilterFragment = new StringBuffer();
-		filterHelper.render( sessionFilterFragment, alias, enabledFilters );
+		filterHelper.render( sessionFilterFragment, getFilterAliasGenerator(alias), enabledFilters );
 
 		return sessionFilterFragment.append( filterFragment( alias ) ).toString();
 	}
@@ -1814,4 +1815,7 @@ public abstract class AbstractCollectionPersister
 	public CollectionInitializer getInitializer() {
 		return initializer;
 	}
+	
+		
+	public abstract FilterAliasGenerator getFilterAliasGenerator(final String rootAlias);
 }

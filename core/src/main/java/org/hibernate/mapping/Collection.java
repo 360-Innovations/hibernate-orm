@@ -24,6 +24,7 @@
  */
 package org.hibernate.mapping;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -34,6 +35,7 @@ import org.hibernate.FetchMode;
 import org.hibernate.MappingException;
 import org.hibernate.engine.Mapping;
 import org.hibernate.engine.ExecuteUpdateResultCheckStyle;
+import org.hibernate.impl.FilterConfiguration;
 import org.hibernate.type.CollectionType;
 import org.hibernate.type.Type;
 import org.hibernate.type.TypeFactory;
@@ -81,8 +83,8 @@ public abstract class Collection implements Fetchable, Value, Filterable {
 	private Class collectionPersisterClass;
 	private String typeName;
 	private Properties typeParameters;
-	private final java.util.Map filters = new HashMap();
-	private final java.util.Map manyToManyFilters = new HashMap();
+	private final java.util.List filters = new ArrayList();
+	private final java.util.List manyToManyFilters = new ArrayList();
 	private final java.util.Set synchronizedTables = new HashSet();
 
 	private String customSQLInsert;
@@ -506,19 +508,21 @@ public abstract class Collection implements Fetchable, Value, Filterable {
 		return deleteAllCheckStyle;
 	}
 
-	public void addFilter(String name, String condition) {
-		filters.put( name, condition );
+	public void addFilter(String name, String condition, boolean autoAliasInjection, java.util.Map aliasTableMap, 
+			java.util.Map aliasEntityMap) {
+		filters.add(new FilterConfiguration(name, condition, autoAliasInjection, aliasTableMap, aliasEntityMap, null));
 	}
 
-	public java.util.Map getFilterMap() {
+	public java.util.List getFilters() {
 		return filters;
 	}
 
-	public void addManyToManyFilter(String name, String condition) {
-		manyToManyFilters.put( name, condition );
+	public void addManyToManyFilter(String name, String condition, boolean autoAliasInjection, 
+			java.util.Map aliasTableMap, java.util.Map aliasEntityMap) {
+		manyToManyFilters.add(new FilterConfiguration(name, condition, autoAliasInjection, aliasTableMap, aliasEntityMap, null));
 	}
 
-	public java.util.Map getManyToManyFilterMap() {
+	public java.util.List getManyToManyFilters() {
 		return manyToManyFilters;
 	}
 

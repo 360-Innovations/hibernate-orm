@@ -30,7 +30,7 @@ package org.hibernate.mapping;
  * @author Steve Ebersole
  */
 public interface Filterable {
-	public void addFilter(String name, String condition);
+	public void addFilter(String name, String condition, boolean autoAliasInjection, java.util.Map aliasTableMap, java.util.Map aliasEntityMap);
 
-	public java.util.Map getFilterMap();
+	public java.util.List getFilters();
 }

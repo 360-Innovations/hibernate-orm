@@ -688,8 +688,9 @@ public abstract class AbstractEntityPersister
 		}
 
 		// Handle any filters applied to the class level
-		filterHelper = new FilterHelper( persistentClass.getFilterMap(), factory.getDialect(), factory.getSqlFunctionRegistry() );
-
+		//OLD filterHelper = new FilterHelper( persistentClass.getFilterMap(), factory.getDialect(), factory.getSqlFunctionRegistry() );
+		filterHelper = new FilterHelper( persistentClass.getFilters(), factory );
+		
 		temporaryIdTableName = persistentClass.getTemporaryIdTableName();
 		temporaryIdTableDDL = persistentClass.getTemporaryIdTableDDL();
 	}
@@ -1426,7 +1427,7 @@ public abstract class AbstractEntityPersister
 		}
 	}
 
-	protected String generateTableAlias(String rootAlias, int tableNumber) {
+	public static String staticGenerateTableAlias(String rootAlias, int tableNumber) {
 		if ( tableNumber == 0 ) {
 			return rootAlias;
 		}
@@ -1437,6 +1438,18 @@ public abstract class AbstractEntityPersister
 		return buf.append( tableNumber ).append( '_' ).toString();
 	}
 
+	public String generateTableAlias(String rootAlias, int tableNumber) {
+		if ( tableNumber == 0 ) {
+			return rootAlias;
+		}
+		StringBuffer buf = new StringBuffer().append( rootAlias );
+		if ( !rootAlias.endsWith( "_" ) ) {
+			buf.append( '_' );
+		}
+		return buf.append( tableNumber ).append( '_' ).toString();
+	}
+
+	
 	public String[] toColumns(String name, final int i) {
 		final String alias = generateTableAlias( name, getSubclassPropertyTableNumber( i ) );
 		String[] cols = getSubclassPropertyColumnNames( i );
@@ -2789,7 +2802,8 @@ public abstract class AbstractEntityPersister
 
 	public String filterFragment(String alias, Map enabledFilters) throws MappingException {
 		final StringBuffer sessionFilterFragment = new StringBuffer();
-		filterHelper.render( sessionFilterFragment, generateFilterConditionAlias( alias ), enabledFilters );
+		//OLD filterHelper.render( sessionFilterFragment, generateFilterConditionAlias( alias ), enabledFilters );
+		filterHelper.render( sessionFilterFragment, getFilterAliasGenerator(alias), enabledFilters );
 
 		return sessionFilterFragment.append( filterFragment( alias ) ).toString();
 	}
@@ -3851,4 +3865,14 @@ public abstract class AbstractEntityPersister
 	}
 	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+	public static int getTableId(String tableName, String[] tables) {
+		for ( int j = 0; j < tables.length; j++ ) {
+			if ( tableName.equalsIgnoreCase( tables[j] ) ) {
+				return j;
+			}
+		}
+		throw new AssertionFailure( "Table " + tableName + " not found" );
+	}
+	
+	
 }

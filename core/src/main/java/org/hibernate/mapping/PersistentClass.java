@@ -33,6 +33,7 @@ import org.hibernate.EntityMode;
 import org.hibernate.dialect.Dialect;
 import org.hibernate.engine.Mapping;
 import org.hibernate.engine.ExecuteUpdateResultCheckStyle;
+import org.hibernate.impl.FilterConfiguration;
 import org.hibernate.sql.Alias;
 import org.hibernate.util.EmptyIterator;
 import org.hibernate.util.JoinedIterator;
@@ -72,7 +73,7 @@ public abstract class PersistentClass implements Serializable, Filterable, MetaA
 	private java.util.Map metaAttributes;
 	private ArrayList joins = new ArrayList();
 	private final ArrayList subclassJoins = new ArrayList();
-	private final java.util.Map filters = new HashMap();
+	private final java.util.List filters = new ArrayList();
 	protected final java.util.Set synchronizedTables = new HashSet();
 	private String loaderName;
 	private Boolean isAbstract;
@@ -624,11 +625,12 @@ public abstract class PersistentClass implements Serializable, Filterable, MetaA
 		return deleteCheckStyle;
 	}
 
-	public void addFilter(String name, String condition) {
-		filters.put(name, condition);
+	public void addFilter(String name, String condition, boolean autoAliasInjection, 
+			java.util.Map aliasTableMap, java.util.Map aliasEntityMap) {
+		filters.add(new FilterConfiguration(name, condition, autoAliasInjection, aliasTableMap, aliasEntityMap,  this));
 	}
 
-	public java.util.Map getFilterMap() {
+	public java.util.List getFilters() {
 		return filters;
 	}
 

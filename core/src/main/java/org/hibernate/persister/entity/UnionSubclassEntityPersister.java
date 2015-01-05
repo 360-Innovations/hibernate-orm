@@ -43,6 +43,8 @@ import org.hibernate.engine.Mapping;
 import org.hibernate.engine.SessionFactoryImplementor;
 import org.hibernate.engine.ExecuteUpdateResultCheckStyle;
 import org.hibernate.id.IdentityGenerator;
+import org.hibernate.impl.FilterAliasGenerator;
+import org.hibernate.impl.StaticFilterAliasGenerator;
 import org.hibernate.mapping.Column;
 import org.hibernate.mapping.PersistentClass;
 import org.hibernate.mapping.Subclass;
@@ -478,5 +480,9 @@ public class UnionSubclassEntityPersister extends AbstractEntityPersister {
 
 	public String[][] getContraintOrderedTableKeyColumnClosure() {
 		return constraintOrderedKeyColumnNames;
+	}
+	
+	public FilterAliasGenerator getFilterAliasGenerator(String rootAlias) {
+		return new StaticFilterAliasGenerator(rootAlias);
 	}
 }

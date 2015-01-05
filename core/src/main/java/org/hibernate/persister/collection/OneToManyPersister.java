@@ -31,6 +31,7 @@ import java.util.Iterator;
 
 import org.hibernate.HibernateException;
 import org.hibernate.MappingException;
+import org.hibernate.impl.FilterAliasGenerator;
 import org.hibernate.jdbc.Expectation;
 import org.hibernate.jdbc.Expectations;
 import org.hibernate.cache.CacheException;
@@ -383,5 +384,9 @@ public class OneToManyPersister extends AbstractCollectionPersister {
 		return new CollectionElementLoader( this, getFactory(), session.getEnabledFilters() )
 				.loadElement( session, key, incrementIndexByBase(index) );
 	}
-
+	
+	public FilterAliasGenerator getFilterAliasGenerator(String rootAlias) {
+		return getElementPersister().getFilterAliasGenerator(rootAlias);
+	}
+	
 }

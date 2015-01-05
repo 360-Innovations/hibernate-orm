@@ -40,6 +40,7 @@ import org.hibernate.engine.SessionFactoryImplementor;
 import org.hibernate.engine.SessionImplementor;
 import org.hibernate.engine.ValueInclusion;
 import org.hibernate.id.IdentifierGenerator;
+import org.hibernate.impl.FilterAliasGenerator;
 import org.hibernate.metadata.ClassMetadata;
 import org.hibernate.type.Type;
 import org.hibernate.type.VersionType;
@@ -699,4 +700,7 @@ public interface EntityPersister extends OptimisticCacheSource {
 	 * this persister.
 	 */
 	public EntityPersister getSubclassEntityPersister(Object instance, SessionFactoryImplementor factory, EntityMode entityMode);
+	
+
+	public FilterAliasGenerator getFilterAliasGenerator(final String rootAlias);
 }

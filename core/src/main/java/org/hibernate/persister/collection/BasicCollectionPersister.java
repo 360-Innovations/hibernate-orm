@@ -31,6 +31,8 @@ import java.util.Iterator;
 
 import org.hibernate.HibernateException;
 import org.hibernate.MappingException;
+import org.hibernate.impl.FilterAliasGenerator;
+import org.hibernate.impl.StaticFilterAliasGenerator;
 import org.hibernate.jdbc.Expectations;
 import org.hibernate.jdbc.Expectation;
 import org.hibernate.type.AssociationType;
@@ -340,4 +342,10 @@ public class BasicCollectionPersister extends AbstractCollectionPersister {
 			);
 	}
 
+
+	public FilterAliasGenerator getFilterAliasGenerator(String rootAlias) {
+		return new StaticFilterAliasGenerator(rootAlias);
+	}
+	
+	
 }

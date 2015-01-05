@@ -40,6 +40,8 @@ import org.hibernate.engine.Mapping;
 import org.hibernate.engine.SessionFactoryImplementor;
 import org.hibernate.engine.Versioning;
 import org.hibernate.engine.ExecuteUpdateResultCheckStyle;
+import org.hibernate.impl.DynamicFilterAliasGenerator;
+import org.hibernate.impl.FilterAliasGenerator;
 import org.hibernate.mapping.Column;
 import org.hibernate.mapping.KeyValue;
 import org.hibernate.mapping.PersistentClass;
@@ -471,7 +473,7 @@ public class JoinedSubclassEntityPersister extends AbstractEntityPersister {
 		return tableNames[0];
 	}
 
-	private static int getTableId(String tableName, String[] tables) {
+	public static int getTableId(String tableName, String[] tables) {
 		for ( int j=0; j<tables.length; j++ ) {
 			if ( tableName.equals( tables[j] ) ) {
 				return j;
@@ -491,7 +493,7 @@ public class JoinedSubclassEntityPersister extends AbstractEntityPersister {
 
 		for ( int i=0; i<discriminatorValues.length; i++ ) {
 			cases.addWhenColumnNotNull(
-				generateTableAlias( alias, notNullColumnTableNumbers[i] ),
+				staticGenerateTableAlias( alias, notNullColumnTableNumbers[i] ),
 				notNullColumnNames[i],
 				discriminatorValues[i]
 			);
@@ -507,7 +509,7 @@ public class JoinedSubclassEntityPersister extends AbstractEntityPersister {
 	}
 
 	public String generateFilterConditionAlias(String rootAlias) {
-		return generateTableAlias( rootAlias, tableSpan-1 );
+		return staticGenerateTableAlias( rootAlias, tableSpan-1 );
 	}
 
 	public String[] getIdentifierColumnNames() {
@@ -596,7 +598,7 @@ public class JoinedSubclassEntityPersister extends AbstractEntityPersister {
 	}
 
 	public String getRootTableAlias(String drivingAlias) {
-		return generateTableAlias( drivingAlias, getTableId( getRootTableName(), tableNames ) );
+		return staticGenerateTableAlias( drivingAlias, getTableId( getRootTableName(), tableNames ) );
 	}
 
 	public Declarer getSubclassPropertyDeclarer(String propertyPath) {
@@ -606,4 +608,9 @@ public class JoinedSubclassEntityPersister extends AbstractEntityPersister {
 		}
 		return super.getSubclassPropertyDeclarer( propertyPath );
 	}
+	
+	
+	public FilterAliasGenerator getFilterAliasGenerator(String rootAlias) {
+		return new DynamicFilterAliasGenerator(subclassTableNameClosure, rootAlias);
+	}	
 }

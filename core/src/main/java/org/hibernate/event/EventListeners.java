@@ -102,6 +102,7 @@ public class EventListeners extends Cloneable implements Serializable {
 	private SaveOrUpdateEventListener[] saveEventListeners = { new DefaultSaveEventListener() };
 	private SaveOrUpdateEventListener[] updateEventListeners = { new DefaultUpdateEventListener() };
 	private MergeEventListener[] saveOrUpdateCopyEventListeners = { new DefaultSaveOrUpdateCopyEventListener() };//saveOrUpdateCopy() is deprecated!
+	private OpenSessionEventListener[] openSessionEventListeners = { };
 
 	private static Map eventInterfaceFromType;
 
@@ -142,6 +143,7 @@ public class EventListeners extends Cloneable implements Serializable {
 		eventInterfaceFromType.put("post-collection-recreate", PostCollectionRecreateEventListener.class);
 		eventInterfaceFromType.put("post-collection-remove", PostCollectionRemoveEventListener.class);
 		eventInterfaceFromType.put("post-collection-update", PostCollectionUpdateEventListener.class);
+		eventInterfaceFromType.put("open-session", OpenSessionEventListener.class);
 		eventInterfaceFromType = Collections.unmodifiableMap( eventInterfaceFromType );
 	}
 
@@ -508,6 +510,16 @@ public class EventListeners extends Cloneable implements Serializable {
 	public void setPostCommitUpdateEventListeners(
 			PostUpdateEventListener[] postCommitUpdateEventListeners) {
 		this.postCommitUpdateEventListeners = postCommitUpdateEventListeners;
+	}
+	
+	
+	public OpenSessionEventListener[] getOpenSessionEventListeners() {
+		return openSessionEventListeners;
+	}
+	
+	public void setOpenSessionEventListeners(
+			OpenSessionEventListener[] openSessionEventListeners) {
+		this.openSessionEventListeners = openSessionEventListeners;
 	}
 
 }

@@ -101,6 +101,8 @@ import org.hibernate.event.LockEvent;
 import org.hibernate.event.LockEventListener;
 import org.hibernate.event.MergeEvent;
 import org.hibernate.event.MergeEventListener;
+import org.hibernate.event.OpenSessionEvent;
+import org.hibernate.event.OpenSessionEventListener;
 import org.hibernate.event.PersistEvent;
 import org.hibernate.event.PersistEventListener;
 import org.hibernate.event.RefreshEvent;
@@ -196,6 +198,8 @@ public final class SessionImpl extends AbstractSessionImpl
 		this.autoCloseSessionEnabled = false;
 		this.connectionReleaseMode = null;
 
+		fireOpenSession(new OpenSessionEvent(this));
+
 		if ( factory.getStatistics().isStatisticsEnabled() ) {
 			factory.getStatisticsImplementor().openSession();
 		}
@@ -240,6 +244,8 @@ public final class SessionImpl extends AbstractSessionImpl
 		this.connectionReleaseMode = connectionReleaseMode;
 		this.jdbcContext = new JDBCContext( this, connection, interceptor );
 
+		fireOpenSession(new OpenSessionEvent(this));
+		
 		if ( factory.getStatistics().isStatisticsEnabled() ) {
 			factory.getStatisticsImplementor().openSession();
 		}
@@ -533,6 +539,13 @@ public final class SessionImpl extends AbstractSessionImpl
 		SaveOrUpdateEventListener[] saveOrUpdateEventListener = listeners.getSaveOrUpdateEventListeners();
 		for ( int i = 0; i < saveOrUpdateEventListener.length; i++ ) {
 			saveOrUpdateEventListener[i].onSaveOrUpdate(event);
+		}
+	}
+	
+	private void fireOpenSession(OpenSessionEvent event) {
+		OpenSessionEventListener[] openSessionEventListener = listeners.getOpenSessionEventListeners();
+		for ( int i = 0; i < openSessionEventListener.length; i++ ) {
+			openSessionEventListener[i].onOpenSession(event);
 		}
 	}
 
